@@ -2,16 +2,32 @@ export class UTCDateMini extends Date {
   constructor() {
     super();
 
-    this.setTime(
-      arguments.length === 0
-        ? // Enables Sinon's fake timers that override the constructor
-          Date.now()
-        : arguments.length === 1
-        ? typeof arguments[0] === "string"
-          ? +new Date(arguments[0])
-          : arguments[0]
-        : Date.UTC(...arguments)
-    );
+    if (arguments.length === 0) {
+      this.setTime(Date.now());
+    } else if (arguments.length === 1) {
+      if (typeof arguments[0] === "string") {
+        const dateString = arguments[0];
+        // Append 'Z' to date strings without timezones to treat them as UTC
+        const hasTimezone = dateString.includes('Z') || /[+-]\d{2}:\d{2}/.test(dateString);
+        this.setTime(+new Date(hasTimezone ? dateString : `${dateString}Z`));
+      } else {
+        this.setTime(arguments[0]);
+      }
+    } else {
+      this.setTime(Date.UTC(...arguments));
+    }
+
+    // original implementation
+    // this.setTime(
+    //   arguments.length === 0
+    //     ? // Enables Sinon's fake timers that override the constructor
+    //       Date.now()
+    //     : arguments.length === 1
+    //     ? typeof arguments[0] === "string"
+    //       ? +new Date(arguments[0])
+    //       : arguments[0]
+    //     : Date.UTC(...arguments)
+    // );
   }
 
   getTimezoneOffset() {

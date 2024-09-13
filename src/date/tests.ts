@@ -4,9 +4,11 @@ import { UTCDate } from "./index.js";
 
 describe("UTCDate", () => {
   it("creates date in UTC", () => {
-    expect(new UTCDate(1987, 1, 11).getTime()).toBe(
-      new Date(1987, 1, 11, 5, 30).getTime()
-    );
+    expect(new UTCDate(1987, 1, 11).toISOString()).toBe("1987-02-11T00:00:00.000Z");
+    // changed from this as it depended on the creator's timezone
+    // expect(new UTCDate(1987, 1, 11).getTime()).toBe(
+    //   new Date(1987, 1, 11, 5, 30).getTime()
+    // );
   });
 
   describe("constructor", () => {
@@ -262,4 +264,69 @@ describe("UTCDate", () => {
       expect(+new UTCDate()).toBe(expected);
     });
   });
+
+  describe("string dates parsing", () => {
+    it("parses string without timezone as UTC", () => {
+      const utcDate = new UTCDate("2023-05-03T12:00:00");
+      const expectedDate = new Date("2023-05-03T12:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("parses string with 'Z' as timezone correctly", () => {
+      const utcDate = new UTCDate("2023-05-03T12:00:00Z");
+      const expectedDate = new Date("2023-05-03T12:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("parses string with explicit timezone correctly", () => {
+      const utcDate = new UTCDate("2023-05-03T12:00:00+02:00");
+      const expectedDate = new Date("2023-05-03T12:00:00+02:00");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("treats date strings without time as UTC midnight", () => {
+      const utcDate = new UTCDate("2023-05-03");
+      const expectedDate = new Date("2023-05-03T00:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("treats YYYY-MM strings as UTC midnight", () => {
+      const utcDate = new UTCDate("2023-05");
+      const expectedDate = new Date("2023-05-01T00:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("treats YYYY strings as UTC midnight", () => {
+      const utcDate = new UTCDate("2023");
+      const expectedDate = new Date("2023-01-01T00:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("parses YYYY-MMTHH:mm strings properly", () => {
+      const utcDate = new UTCDate("2023-05T12:00");
+      const expectedDate = new Date("2023-05-01T12:00:00Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("parses YYYY-MM-DDTHH:mm:ss strings properly", () => {
+      const utcDate = new UTCDate("2023-05-01T12:00:15");
+      const expectedDate = new Date("2023-05-01T12:00:15Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+
+    it("parses YYYY-MM-DDTHH:mm:ss.sss strings properly", () => {
+      const utcDate = new UTCDate("2023-05-01T12:00:15.123");
+      const expectedDate = new Date("2023-05-01T12:00:15.123Z");
+
+      expect(+utcDate).toBe(+expectedDate);
+    });
+  })
 });
